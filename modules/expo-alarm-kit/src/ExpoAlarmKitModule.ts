@@ -29,10 +29,18 @@ function schedule(): void {
   // TODO: Implement actual alarm scheduling
 }
 
+/**
+ * Schedule an alarm (placeholder implementation)
+ */
+async function scheduleOneOffAsync(): Promise<void> {
+  return AlarmKitManager.scheduleOneOffAsync();
+}
+
 export const AlarmKit = {
   getAlarmPermissionsAsync,
   requestAlarmPermissionsAsync,
   schedule,
+  scheduleOneOffAsync,
 };
 
 // Default export for easier imports

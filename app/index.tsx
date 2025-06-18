@@ -32,6 +32,13 @@ export default function Index() {
       <Text>Edit app/index.tsx to edit this screen.</Text>
       <Text>{alarmPermissionStatus}</Text>
       <Button
+        title="Schedule One Off Alarm"
+        onPress={() => {
+          ExpoAlarmKit.scheduleOneOffAsync();
+          alert("One off alarm scheduled");
+        }}
+      />
+      <Button
         title="Schedule Alarm"
         onPress={() => {
           ExpoAlarmKit.schedule();

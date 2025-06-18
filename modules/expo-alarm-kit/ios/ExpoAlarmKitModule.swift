@@ -7,28 +7,41 @@ struct SimpleMetadata: AlarmMetadata {
     // Empty implementation is fine for basic usage
 }
 
+@available(iOS 26.0, *)
+func scheduleOneOffAlarm() async throws {
+  // 1. Authorisation
+  let mgr = AlarmManager.shared
+  guard try await mgr.requestAuthorization() == .authorized else { return }
+
+  // 2. Alarm presentation (basic stop button, default sound)
+  let alert = AlarmPresentation.Alert(
+    title: "Expo test alarm",
+    stopButton: .init(text: "Stop", textColor: .white, systemImageName: "xmark"),
+    secondaryButton: AlarmButton(text: "Repeat", textColor: .blue, systemImageName: "repeat"),
+    secondaryButtonBehavior: .countdown
+  )
+  
+  let presentation = AlarmPresentation(alert: alert)
+ 
+  // 3. Attributes & configuration
+  let attrs = AlarmAttributes<SimpleMetadata>(presentation: presentation,
+                                              tintColor: .accentColor)
+  let fireDate = Date().addingTimeInterval(10)
+  let schedule = Alarm.Schedule.fixed(fireDate)
+
+  let config = AlarmManager.AlarmConfiguration(schedule: schedule,
+                                               attributes: attrs)
+
+  // 4. Schedule
+  let _ = try await mgr.schedule(id: UUID(), configuration: config)
+}
+
 public class ExpoAlarmKitModule: Module {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
   public func definition() -> ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ExpoAlarmKit')` in JavaScript.
     Name("ExpoAlarmKit")
-    
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants([
-      "PI": Double.pi
-    ])
     
     // Defines event names that the module can send to JavaScript.
     Events("onChange")
-    
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      return "Hello world! 👋"
-    }
     
     Function("schedule") {
       if #available(iOS 26.0, macOS 26.0, *) {
@@ -70,10 +83,10 @@ public class ExpoAlarmKitModule: Module {
           )
           
           // Create a schedule for 2 minutes from now
-          let twoMinsFromNow = Date.now.addingTimeInterval(2 * 60)
+          let minsFromNow = Date.now.addingTimeInterval(1 * 60)
           let time = Alarm.Schedule.Relative.Time(
-            hour: Calendar.current.component(.hour, from: twoMinsFromNow),
-            minute: Calendar.current.component(.minute, from: twoMinsFromNow)
+            hour: Calendar.current.component(.hour, from: minsFromNow),
+            minute: Calendar.current.component(.minute, from: minsFromNow)
           )
           let schedule = Alarm.Schedule.relative(.init(time: time))
           
@@ -93,36 +106,42 @@ public class ExpoAlarmKitModule: Module {
         }
       }
     }
-
+    
     AsyncFunction("getAlarmPermissionsAsync") { (promise: Promise) in
-      if #available(iOS 26.0, macOS 26.0, *) {
+      guard #available(iOS 26.0, macOS 26.0, *) else {
+        promise.reject(UnavailableException())
+        return
+      }
+
+      Task {
+        let alarmManager = AlarmManager.shared
+        var state = alarmManager.authorizationState
+
+        if state == .notDetermined {
+          state = (try? await alarmManager.requestAuthorization()) ?? .notDetermined
+        }
+
+        let status: String
+        switch state {
+        case .authorized:
+          status = "authorized"
+        case .denied:
+          status = "denied"
+        case .notDetermined:
+          status = "notDetermined"
+        @unknown default:
+          status = "unknown"
+        }
+
+        promise.resolve(status)
+      }
+    }
+    
+    AsyncFunction("scheduleOneOffAsync") { (promise: Promise) in
+      if #available(iOS 26.0, *) {
         Task {
-          let alarmManager = AlarmManager.shared
-          let state = alarmManager.authorizationState
-          
-          if state == .notDetermined {
-            let result = try? await alarmManager.requestAuthorization()
-            switch result {
-            case .authorized:
-              promise.resolve("authorized")
-            case .denied:
-              promise.resolve("denied")
-            default:
-              promise.resolve("notDetermined")
-            }
-            return
-          }
-          
-          switch state {
-          case .authorized:
-            promise.resolve("authorized")
-          case .denied:
-            promise.resolve("denied")
-          case .notDetermined:
-            promise.resolve("notDetermined")
-          @unknown default:
-            promise.resolve("unknown")
-          }
+          do   { try await scheduleOneOffAlarm(); promise.resolve(nil) }
+          catch { promise.reject(error) }
         }
       } else {
         promise.reject(UnavailableException())
