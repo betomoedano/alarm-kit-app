@@ -16,15 +16,15 @@ public class ExpoAlarmKitModule: Module {
     // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
     // The module will be accessible from `requireNativeModule('ExpoAlarmKit')` in JavaScript.
     Name("ExpoAlarmKit")
-
+    
     // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
     Constants([
       "PI": Double.pi
     ])
-
+    
     // Defines event names that the module can send to JavaScript.
     Events("onChange")
-
+    
     // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
     Function("hello") {
       return "Hello world! 👋"
@@ -93,7 +93,37 @@ public class ExpoAlarmKitModule: Module {
         }
       }
     }
-
+    
+    AsyncFunction("getAlarmPermissionsAsync") { (promise: Promise) in
+      if #available(iOS 26.0, macOS 26.0, *) {
+        Task {
+          let alarmManager = AlarmManager.shared
+          
+          let authorized: Bool
+          switch alarmManager.authorizationState {
+          case .notDetermined:
+            authorized = (try? await alarmManager.requestAuthorization()) == .authorized
+          case .authorized:
+            authorized = true
+          case .denied:
+            authorized = false
+          @unknown default:
+            authorized = false
+          }
+          
+          guard authorized else {
+            print(">>> AlarmKit not authorized.")
+            promise.reject(PermissionsNotGranted())
+            return
+          }
+          
+          promise.resolve(authorized)
+        }
+      } else {
+        promise.reject(UnavailableException())
+      }
+    }
+    
     // Defines a JavaScript function that always returns a Promise and whose native code
     // is by default dispatched on the different thread than the JavaScript runtime runs on.
     AsyncFunction("setValueAsync") { (value: String) in
@@ -102,5 +132,7 @@ public class ExpoAlarmKitModule: Module {
         "value": value
       ])
     }
+    
   }
 }
+
