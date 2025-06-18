@@ -1,39 +1,24 @@
 import AlarmKitManager from "./AlarmKitManager";
+import { AlarmPermissionStatus } from "./ExpoAlarmKit.types";
 
 /**
- * Request and check alarm permissions.
+ * Gets and requests alarm permission if needed.
  *
- * @returns Promise that resolves to `true` if permissions are granted
- * @throws {PermissionsNotGranted} When alarm permissions are denied or not available
- * @throws {UnavailableException} When AlarmKit is not available (requires iOS 26+)
+ * @returns Promise that resolves to `AlarmPermissionStatus`
  *
- * @example
- * ```typescript
- * try {
- *   const hasPermissions = await getAlarmPermissionsAsync();
- *   console.log('Alarm permissions granted:', hasPermissions); // true
- * } catch (error) {
- *   if (error.code === 'PermissionsNotGranted') {
- *     console.log('User denied alarm permissions');
- *   } else if (error.code === 'UnavailableException') {
- *     console.log('AlarmKit requires iOS 26 or higher');
- *   }
- * }
- * ```
  */
-async function getAlarmPermissionsAsync(): Promise<boolean> {
+async function getAlarmPermissionsAsync(): Promise<AlarmPermissionStatus> {
   return AlarmKitManager.getAlarmPermissionsAsync();
 }
 
 /**
- * Request alarm permissions.
+ * Gets and requests alarm permission if needed.
  *
- * @returns Promise that resolves to `true` if permissions are granted
- * @throws {PermissionsNotGranted} When alarm permissions are denied or not available
- * @throws {UnavailableException} When AlarmKit is not available (requires iOS 26+)
+ * @returns Promise that resolves to `AlarmPermissionStatus`
+ *
  */
-async function requestAlarmPermissionsAsync(): Promise<boolean> {
-  return AlarmKitManager.requestAlarmPermissionsAsync();
+async function requestAlarmPermissionsAsync(): Promise<AlarmPermissionStatus> {
+  return AlarmKitManager.getAlarmPermissionsAsync();
 }
 
 /**

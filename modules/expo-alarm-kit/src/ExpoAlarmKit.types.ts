@@ -4,8 +4,14 @@ export type ExpoAlarmKitModuleEvents = {
   onChange: (params: string) => void;
 };
 
+export type AlarmPermissionStatus =
+  | "authorized"
+  | "denied"
+  | "notDetermined"
+  | "unknown";
+
 export declare class ExpoAlarmKitModule extends NativeModule<ExpoAlarmKitModuleEvents> {
-  getAlarmPermissionsAsync(): Promise<boolean>;
+  getAlarmPermissionsAsync(): Promise<AlarmPermissionStatus>;
   requestAlarmPermissionsAsync(): Promise<boolean>;
   schedule(): void;
 }

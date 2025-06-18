@@ -1,18 +1,21 @@
 import { Button, Text, View } from "react-native";
-import ExpoAlarmKit from "@/modules/expo-alarm-kit";
+import ExpoAlarmKit, { AlarmPermissionStatus } from "@/modules/expo-alarm-kit";
 import { useEffect, useState } from "react";
 
 export default function Index() {
-  const [hasPermissions, setHasPermissions] = useState(false);
+  const [alarmPermissionStatus, setAlarmPermissionStatus] =
+    useState<AlarmPermissionStatus>("notDetermined");
 
   useEffect(() => {
     getPermissions();
-  }, [hasPermissions]);
+  }, []);
 
   async function getPermissions() {
     try {
-      const hasPermissions = await ExpoAlarmKit.getAlarmPermissionsAsync();
-      setHasPermissions(hasPermissions);
+      const alarmPermissionStatus =
+        await ExpoAlarmKit.getAlarmPermissionsAsync();
+      console.log(">>> alarmPermissionStatus", alarmPermissionStatus);
+      setAlarmPermissionStatus(alarmPermissionStatus);
     } catch (error) {
       console.error(error);
     }
@@ -27,9 +30,7 @@ export default function Index() {
       }}
     >
       <Text>Edit app/index.tsx to edit this screen.</Text>
-      <Text>
-        {hasPermissions ? "Permissions granted" : "Permissions denied"}
-      </Text>
+      <Text>{alarmPermissionStatus}</Text>
       <Button title="Schedule Alarm" onPress={() => ExpoAlarmKit.schedule()} />
     </View>
   );

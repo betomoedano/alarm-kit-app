@@ -93,31 +93,36 @@ public class ExpoAlarmKitModule: Module {
         }
       }
     }
-    
+
     AsyncFunction("getAlarmPermissionsAsync") { (promise: Promise) in
       if #available(iOS 26.0, macOS 26.0, *) {
         Task {
           let alarmManager = AlarmManager.shared
+          let state = alarmManager.authorizationState
           
-          let authorized: Bool
-          switch alarmManager.authorizationState {
-          case .notDetermined:
-            authorized = (try? await alarmManager.requestAuthorization()) == .authorized
-          case .authorized:
-            authorized = true
-          case .denied:
-            authorized = false
-          @unknown default:
-            authorized = false
-          }
-          
-          guard authorized else {
-            print(">>> AlarmKit not authorized.")
-            promise.reject(PermissionsNotGranted())
+          if state == .notDetermined {
+            let result = try? await alarmManager.requestAuthorization()
+            switch result {
+            case .authorized:
+              promise.resolve("authorized")
+            case .denied:
+              promise.resolve("denied")
+            default:
+              promise.resolve("notDetermined")
+            }
             return
           }
           
-          promise.resolve(authorized)
+          switch state {
+          case .authorized:
+            promise.resolve("authorized")
+          case .denied:
+            promise.resolve("denied")
+          case .notDetermined:
+            promise.resolve("notDetermined")
+          @unknown default:
+            promise.resolve("unknown")
+          }
         }
       } else {
         promise.reject(UnavailableException())
