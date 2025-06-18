@@ -6,21 +6,6 @@ export default function Index() {
   const [alarmPermissionStatus, setAlarmPermissionStatus] =
     useState<AlarmPermissionStatus>("notDetermined");
 
-  useEffect(() => {
-    getPermissions();
-  }, []);
-
-  async function getPermissions() {
-    try {
-      const alarmPermissionStatus =
-        await ExpoAlarmKit.getAlarmPermissionsAsync();
-      console.log(">>> alarmPermissionStatus", alarmPermissionStatus);
-      setAlarmPermissionStatus(alarmPermissionStatus);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   return (
     <View
       style={{
