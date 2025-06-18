@@ -6,10 +6,17 @@ export default function Index() {
   const [hasPermissions, setHasPermissions] = useState(false);
 
   useEffect(() => {
-    ExpoAlarmKit.getAlarmPermissionsAsync().then((hasPermissions) => {
-      setHasPermissions(hasPermissions);
-    });
+    getPermissions();
   }, [hasPermissions]);
+
+  async function getPermissions() {
+    try {
+      const hasPermissions = await ExpoAlarmKit.getAlarmPermissionsAsync();
+      setHasPermissions(hasPermissions);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <View
