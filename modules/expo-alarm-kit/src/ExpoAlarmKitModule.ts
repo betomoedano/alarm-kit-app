@@ -7,6 +7,7 @@ declare class ExpoAlarmKitModule extends NativeModule<ExpoAlarmKitModuleEvents> 
   hello(): string;
   schedule(): Promise<void>;
   setValueAsync(value: string): Promise<void>;
+  getAlarmPermissionsAsync(): Promise<boolean>;
 }
 
 // This call loads the native module object from the JSI.
