@@ -60,10 +60,12 @@ export default function Index() {
         }}
       />
       <Button
-        title="Schedule Alarm"
+        title="Get All Scheduled Alarms"
         onPress={() => {
-          ExpoAlarmKit.schedule();
-          alert("Alarm scheduled");
+          ExpoAlarmKit.getAllScheduledAlarmsAsync().then((alarms) => {
+            console.log(">>> alarms", alarms);
+            alert("All scheduled alarms");
+          });
         }}
       />
     </View>

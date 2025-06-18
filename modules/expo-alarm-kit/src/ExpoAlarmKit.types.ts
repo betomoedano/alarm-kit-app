@@ -13,6 +13,6 @@ export type AlarmPermissionStatus =
 export declare class ExpoAlarmKitModule extends NativeModule<ExpoAlarmKitModuleEvents> {
   getAlarmPermissionsAsync(): Promise<AlarmPermissionStatus>;
   requestAlarmPermissionsAsync(): Promise<boolean>;
+  getAllScheduledAlarmsAsync(): Promise<any[]>;
   scheduleOneOffAsync(): Promise<void>;
-  schedule(): void;
 }

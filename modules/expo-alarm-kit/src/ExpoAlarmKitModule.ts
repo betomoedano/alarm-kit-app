@@ -24,23 +24,22 @@ async function requestAlarmPermissionsAsync(): Promise<AlarmPermissionStatus> {
 /**
  * Schedule an alarm (placeholder implementation)
  */
-function schedule(): void {
-  console.log("Schedule alarm called");
-  // TODO: Implement actual alarm scheduling
+async function scheduleOneOffAsync(): Promise<void> {
+  return AlarmKitManager.scheduleOneOffAsync();
 }
 
 /**
- * Schedule an alarm (placeholder implementation)
+ * Get all scheduled alarms.
  */
-async function scheduleOneOffAsync(): Promise<void> {
-  return AlarmKitManager.scheduleOneOffAsync();
+async function getAllScheduledAlarmsAsync(): Promise<any[]> {
+  return AlarmKitManager.getAllScheduledAlarmsAsync();
 }
 
 export const AlarmKit = {
   getAlarmPermissionsAsync,
   requestAlarmPermissionsAsync,
-  schedule,
   scheduleOneOffAsync,
+  getAllScheduledAlarmsAsync,
 };
 
 // Default export for easier imports
