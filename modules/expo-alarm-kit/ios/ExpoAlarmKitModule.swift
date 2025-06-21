@@ -7,6 +7,12 @@ struct SimpleMetadata: AlarmMetadata {
     // Empty implementation is fine for basic usage
 }
 
+struct AlarmRecord: Record {
+  @Field var id: String
+  @Field var fireDate: Double?
+  @Field var state: String
+}
+
 public class ExpoAlarmKitModule: Module {
   public func definition() -> ModuleDefinition {
     Name("ExpoAlarmKit")
@@ -19,7 +25,21 @@ public class ExpoAlarmKitModule: Module {
         Task {
           do {
             let alarms = try await getAllScheduledAlarms()
-            promise.resolve(alarms)
+            let alarmRecords: [AlarmRecord] = alarms.map { alarm in
+              let fireDate: Double? = {
+                if case .fixed(let date) = alarm.schedule {
+                  return date.timeIntervalSince1970
+                }
+                return nil
+              }()
+              
+              let record = AlarmRecord()
+              record.id = alarm.id.uuidString
+              record.fireDate = fireDate
+              record.state = "\(alarm.state)"
+              return record
+            }
+            promise.resolve(alarmRecords)
           } catch {
             promise.reject(error)
           }

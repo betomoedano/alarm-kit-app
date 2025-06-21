@@ -1,5 +1,5 @@
 import AlarmKitManager from "./AlarmKitManager";
-import { AlarmPermissionStatus } from "./ExpoAlarmKit.types";
+import { Alarm, AlarmPermissionStatus, AlarmState } from "./ExpoAlarmKit.types";
 
 /**
  * Gets and requests alarm permission if needed.
@@ -31,7 +31,7 @@ async function scheduleOneOffAsync(): Promise<void> {
 /**
  * Get all scheduled alarms.
  */
-async function getAllScheduledAlarmsAsync(): Promise<any[]> {
+async function getAllScheduledAlarmsAsync(): Promise<Alarm[]> {
   return AlarmKitManager.getAllScheduledAlarmsAsync();
 }
 

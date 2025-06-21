@@ -5,17 +5,30 @@ import {
   Text,
   View,
 } from "react-native";
-import ExpoAlarmKit, { AlarmPermissionStatus } from "@/modules/expo-alarm-kit";
+import ExpoAlarmKit, {
+  Alarm,
+  AlarmPermissionStatus,
+} from "@/modules/expo-alarm-kit";
 import { useEffect, useState } from "react";
 
 export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [alarmPermissionStatus, setAlarmPermissionStatus] =
     useState<AlarmPermissionStatus>("notDetermined");
+  const [alarms, setAlarms] = useState<Alarm[]>([]);
 
   useEffect(() => {
     getAlarmPermissionStatus();
   }, []);
+
+  useEffect(() => {
+    getAlarms();
+  }, []);
+
+  async function getAlarms() {
+    const alarms = await ExpoAlarmKit.getAllScheduledAlarmsAsync();
+    setAlarms(alarms);
+  }
 
   async function getAlarmPermissionStatus() {
     try {
@@ -52,6 +65,13 @@ export default function Index() {
         Alarm Permission Status:{" "}
         <Text style={{ fontWeight: "bold" }}>{alarmPermissionStatus}</Text>
       </Text>
+      {alarms.map((alarm) => (
+        <View key={alarm.id}>
+          <Text>{alarm.id}</Text>
+          <Text>{alarm.state}</Text>
+          <Text>{alarm.fireDate}</Text>
+        </View>
+      ))}
       <Button
         title="Schedule One Off Alarm"
         onPress={() => {
@@ -61,11 +81,10 @@ export default function Index() {
       />
       <Button
         title="Get All Scheduled Alarms"
-        onPress={() => {
-          ExpoAlarmKit.getAllScheduledAlarmsAsync().then((alarms) => {
-            console.log(">>> alarms", alarms);
-            alert("All scheduled alarms");
-          });
+        onPress={async () => {
+          const alarms = await ExpoAlarmKit.getAllScheduledAlarmsAsync();
+
+          console.log(">>> alarms", alarms);
         }}
       />
     </View>
